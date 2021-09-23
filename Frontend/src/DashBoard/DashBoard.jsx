@@ -6,7 +6,7 @@ import {
     Paper, Table, TableBody, TableCell, TableContainer, TableHead, Grid,
     TableRow, Typography, TablePagination, TableFooter, Button, Select, MenuItem
 } from '@material-ui/core';
-import { Doughnut, Line } from 'react-chartjs-2';
+import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import countryList from 'react-select-country-list';
 
 
@@ -22,6 +22,25 @@ const options = {
         ],
     },
 };
+
+const barChartOptions = {
+    scales: {
+        yAxes: [
+            {
+                stacked: true,
+                ticks: {
+                    beginAtZero: true,
+                },
+            },
+        ],
+        xAxes: [
+            {
+                stacked: true,
+            },
+        ],
+    },
+};
+
 
 const useStyles = makeStyles((themes) => ({
     root: {
@@ -73,6 +92,8 @@ function CofferDataDashBoard() {
     const [topicsDataArr, setTopicsDataArr] = useState([]);
     const [endYearDataArr, setEndYearDataArr] = useState([]);
     const [sourceDataArr, setSourceDataArr] = useState([]);
+    const [sectorDataArr, setSectorDataArr] = useState([]);
+    const [sectorDataArrForBarChart, setSectorDataArrForBarChart] = useState([]);
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -175,6 +196,21 @@ function CofferDataDashBoard() {
         setDataArrCopy(EndYearFilterArray);
 
     }
+    const SectorFilter = (e) => {
+
+        alert(e.target.value);
+
+        const sectorFilterArray = [];
+
+        for (let i = 0; i < dataArr.length; i++) {
+            if (dataArr[i].sector === e.target.value) {
+                sectorFilterArray.push(dataArr[i]);
+            }
+        }
+
+        setDataArrCopy(sectorFilterArray);
+
+    }
 
     async function LoadDataFromApi() {
         try {
@@ -184,14 +220,16 @@ function CofferDataDashBoard() {
 
             const regionsArray = fetchedData.data.map(el => el.region).filter((value, index, self) => self.indexOf(value) === index);
             const sourceArray = fetchedData.data.map(el => el.source).filter((value, index, self) => self.indexOf(value) === index);
+            const sectorArray = fetchedData.data.map(el => el.sector).filter((value, index, self) => self.indexOf(value) === index);
 
             const year = (new Date()).getFullYear();
             const years = Array.from(new Array(40), (val, index) => index + year);
 
             const topicsData = fetchedData.data.reduce((acc, o) => (acc[o.topic] = (acc[o.topic] || 0) + 1, acc), {});
             const endYearData = fetchedData.data.reduce((acc, o) => (acc[o.end_year] = (acc[o.end_year] || 0) + 1, acc), {});
+            const sectorDataArray = fetchedData.data.reduce((acc, o) => (acc[o.sector] = (acc[o.sector] || 0) + 1, acc), {});
 
-            console.log(endYearData);
+            console.log(sectorDataArray);
 
             const lineChartData = {
                 labels: [...Object.keys(topicsData)],
@@ -234,6 +272,17 @@ function CofferDataDashBoard() {
                 ],
             };
 
+            const BarChartData = {
+                labels: [...Object.keys(sectorDataArray)],
+                datasets: [
+                    {
+                        label: '# Data according to sectors',
+                        data: [...Object.values(sectorDataArray)],
+                        backgroundColor: 'rgb(255, 99, 132)',
+                    }
+                ],
+            };
+
             setDataArr(fetchedData.data);
             setDataArrCopy(fetchedData.data);
 
@@ -243,6 +292,8 @@ function CofferDataDashBoard() {
             setSourceDataArr(sourceArray);
             setDataArrLineForChart(lineChartData);
             setDataArrDoughnutForChart(doughnutChartData);
+            setSectorDataArr(Object.keys(sectorDataArray));
+            setSectorDataArrForBarChart(BarChartData);
 
         } catch (error) {
 
@@ -314,6 +365,17 @@ function CofferDataDashBoard() {
 
 
                     <p>
+
+                        By Sector:&nbsp;&nbsp;
+                        <select className="DataSector" onChange={SectorFilter}>
+                            {
+                                sectorDataArr.map((sector, index) => {
+                                    return <option>{sector}</option>
+                                })
+                            }
+                        </select>
+
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         By Source:&nbsp;&nbsp;
                         <select className="DataSource" onChange={DataSourceFilter}>
                             {
@@ -426,7 +488,7 @@ function CofferDataDashBoard() {
                     <Doughnut data={dataArrDoughnutForChart} />
                 </div>
             </div>
-
+            <Bar data={sectorDataArrForBarChart} options={barChartOptions} />
         </>
     );
 }

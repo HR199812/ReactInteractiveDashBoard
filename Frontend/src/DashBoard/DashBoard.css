@@ -18,6 +18,7 @@ body {
     font-weight: bold;
     font-size: medium;
 }
+
 .filterBar .UserCountry {
     padding: 7px;
     width: 15%;
@@ -26,7 +27,8 @@ body {
     font-weight: bold;
     font-size: medium;
 }
-.filterBar .DataTopics {
+
+.filterBar .DataTopics, .filterBar .DataRegion, .filterBar .DataSector {
     padding: 7px;
     width: 12%;
     border: 2px solid #303f9f;
@@ -34,14 +36,7 @@ body {
     font-weight: bold;
     font-size: medium;
 }
-.filterBar .DataRegion {
-    padding: 7px;
-    width: 12%;
-    border: 2px solid #303f9f;
-    border-radius: 30px;
-    font-weight: bold;
-    font-size: medium;
-}
+
 .filterBar .DataSource {
     padding: 7px;
     width: 42%;
@@ -50,4 +45,3 @@ body {
     font-weight: bold;
     font-size: medium;
 }
-
