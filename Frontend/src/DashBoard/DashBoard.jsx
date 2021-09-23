@@ -10,6 +10,19 @@ import { Doughnut, Line } from 'react-chartjs-2';
 import countryList from 'react-select-country-list';
 
 
+
+const options = {
+    scales: {
+        yAxes: [
+            {
+                ticks: {
+                    beginAtZero: true,
+                },
+            },
+        ],
+    },
+};
+
 const useStyles = makeStyles((themes) => ({
     root: {
         width: '100%',
@@ -51,6 +64,9 @@ function CofferDataDashBoard() {
 
     const options = useMemo(() => countryList().getData(), []);
 
+
+    const [dataArrLineForChart, setDataArrLineForChart] = useState([]);
+    const [dataArrDoughnutForChart, setDataArrDoughnutForChart] = useState([]);
     const [dataArr, setDataArr] = useState([]);
     const [dataArrCopy, setDataArrCopy] = useState([]);
     const [regionsDataArr, setRegionsDataArr] = useState([]);
@@ -166,20 +182,67 @@ function CofferDataDashBoard() {
 
             console.log(fetchedData);
 
-            const topicsArray = fetchedData.data.map(el => el.topic).filter((value, index, self) => self.indexOf(value) === index);
             const regionsArray = fetchedData.data.map(el => el.region).filter((value, index, self) => self.indexOf(value) === index);
             const sourceArray = fetchedData.data.map(el => el.source).filter((value, index, self) => self.indexOf(value) === index);
 
             const year = (new Date()).getFullYear();
             const years = Array.from(new Array(40), (val, index) => index + year);
 
+            const topicsData = fetchedData.data.reduce((acc, o) => (acc[o.topic] = (acc[o.topic] || 0) + 1, acc), {});
+            const endYearData = fetchedData.data.reduce((acc, o) => (acc[o.end_year] = (acc[o.end_year] || 0) + 1, acc), {});
+
+            console.log(endYearData);
+
+            const lineChartData = {
+                labels: [...Object.keys(topicsData)],
+                datasets: [
+                    {
+                        label: '#No of Topics Occurences',
+                        data: [...Object.values(topicsData)],
+                        fill: false,
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgba(255, 99, 132, 0.2)',
+                    },
+                ],
+            };
+
+
+            const doughnutChartData = {
+                labels: [...Object.keys(endYearData)],
+                datasets: [
+                    {
+                        label: 'Data according to End-Year',
+                        data: [...Object.values(endYearData)],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                        ],
+                        borderWidth: 1,
+                    },
+                ],
+            };
+
             setDataArr(fetchedData.data);
             setDataArrCopy(fetchedData.data);
 
             setRegionsDataArr(regionsArray);
-            setTopicsDataArr(topicsArray);
+            setTopicsDataArr(Object.keys(topicsData));
             setEndYearDataArr(years);
             setSourceDataArr(sourceArray);
+            setDataArrLineForChart(lineChartData);
+            setDataArrDoughnutForChart(doughnutChartData);
 
         } catch (error) {
 
@@ -250,17 +313,19 @@ function CofferDataDashBoard() {
                     </p>
 
 
+                    <p>
+                        By Source:&nbsp;&nbsp;
+                        <select className="DataSource" onChange={DataSourceFilter}>
+                            {
+                                sourceDataArr.map((option) => {
+                                    return (
+                                        <option value={option}>{option}</option>
+                                    );
+                                })
 
-                    <select className="DataSource" onChange={DataSourceFilter}>
-                        {
-                            sourceDataArr.map((option) => {
-                                return (
-                                    <option value={option}>{option}</option>
-                                );
-                            })
-
-                        }
-                    </select>
+                            }
+                        </select>
+                    </p>
 
                 </div>
                 <TableContainer component={Paper} className={classes.container} >
@@ -352,20 +417,16 @@ function CofferDataDashBoard() {
                 </TableContainer>
             </div >
 
-            <Doughnut
-                data={{
-                    // labels: props.chartLabels,
-                    datasets: [
-                        {
-                            data: dataArr,
-                            label: "Activity",
-                            borderColor: "#3333ff",
-                            fill: true,
-                            backgroundColor: "#CAA6DB",
-                        },
-                    ],
-                }}
-            />
+            <div style={{ display: 'block' }}>
+                <div style={{ width: '50%', height: '50%', float: 'left' }}>
+                    <Line data={dataArrLineForChart}
+                        options={options} />
+                </div>
+                <div style={{ width: '30%', height: '30%', float: 'left' }}>
+                    <Doughnut data={dataArrDoughnutForChart} />
+                </div>
+            </div>
+
         </>
     );
 }
