@@ -108,7 +108,6 @@ function CofferDataDashBoard() {
     };
 
     const GoToSource = (url) => {
-        alert(url);
         window.open('http://domain.com', "_blank");
     };
 
@@ -148,8 +147,6 @@ function CofferDataDashBoard() {
 
     const CountryFilter = (e) => {
 
-        alert(e.target.value);
-
         const CountryFilterArray = [];
 
         for (let i = 0; i < dataArr.length; i++) {
@@ -168,8 +165,6 @@ function CofferDataDashBoard() {
     }
     const EndYearFilter = (e) => {
 
-        alert(e.target.value);
-
         const EndYearFilterArray = [];
 
         for (let i = 0; i < dataArr.length; i++) {
@@ -182,8 +177,6 @@ function CofferDataDashBoard() {
 
     }
     const DataSourceFilter = (e) => {
-
-        alert(e.target.value);
 
         const EndYearFilterArray = [];
 
@@ -198,7 +191,6 @@ function CofferDataDashBoard() {
     }
     const SectorFilter = (e) => {
 
-        alert(e.target.value);
 
         const sectorFilterArray = [];
 
@@ -216,11 +208,8 @@ function CofferDataDashBoard() {
         try {
             const fetchedData = await axios.get('http://localhost:5001/coffer/');
 
-            console.log(fetchedData);
-
             const regionsArray = fetchedData.data.map(el => el.region).filter((value, index, self) => self.indexOf(value) === index);
             const sourceArray = fetchedData.data.map(el => el.source).filter((value, index, self) => self.indexOf(value) === index);
-            const sectorArray = fetchedData.data.map(el => el.sector).filter((value, index, self) => self.indexOf(value) === index);
 
             const year = (new Date()).getFullYear();
             const years = Array.from(new Array(40), (val, index) => index + year);
@@ -228,8 +217,6 @@ function CofferDataDashBoard() {
             const topicsData = fetchedData.data.reduce((acc, o) => (acc[o.topic] = (acc[o.topic] || 0) + 1, acc), {});
             const endYearData = fetchedData.data.reduce((acc, o) => (acc[o.end_year] = (acc[o.end_year] || 0) + 1, acc), {});
             const sectorDataArray = fetchedData.data.reduce((acc, o) => (acc[o.sector] = (acc[o.sector] || 0) + 1, acc), {});
-
-            console.log(sectorDataArray);
 
             const lineChartData = {
                 labels: [...Object.keys(topicsData)],
@@ -469,7 +456,7 @@ function CofferDataDashBoard() {
                         <TablePagination
                             rowsPerPageOptions={[5, 10]}
                             component="div"
-                            count={dataArr.length}
+                            count={dataArrCopy.length}
                             rowsPerPage={rowsPerPage}
                             page={page}
                             onChangePage={handleChangePage}
